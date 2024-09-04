@@ -14,8 +14,8 @@ Original file is located at
 
 import agentpy as ap
 from owlready2 import *
-import matplotlib.pyplot as plt
-import IPython
+#import matplotlib.pyplot as plt
+#import IPython
 
 onto = get_ontology("file://ontologia.owl")
 
@@ -356,13 +356,4 @@ parameters = {
 model = SecurityModel(parameters)
 results = model.run()
 
-# Función de animación
-def animation_plot(model, ax):
-    agent_type_grid = model.grid.attr_grid('agentType')
-    ap.gridplot(agent_type_grid, cmap='Accent', ax=ax)
-    ax.set_title(f"Security Model\nTime-step: {model.t}")
-
-# Configuración de la visualización
-fig, ax = plt.subplots()
-animation = ap.animate(model, fig, ax, animation_plot)
-IPython.display.HTML(animation.to_jshtml())
+# Función de animaci
