@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 from threading import Thread, Event as ThreadEvent
 
-model = YOLO('best_2.0.pt')
+model = YOLO('best_mdl.pt')
 
 def clean_buffer(original_buffer):
     buffer = b''
@@ -101,7 +101,7 @@ def socket_server():
     logger = logging.getLogger("socket_server")
 
     HOST = '127.0.0.1'
-    PORT = 8000
+    PORT = 5500
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((HOST, PORT))
