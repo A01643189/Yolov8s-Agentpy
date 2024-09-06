@@ -5,7 +5,7 @@ using System.Collections;
 public class APIClient : MonoBehaviour
 {
     private ObjectManager objectManager;
-    private const string apiUrl = "http://localhost:5500";  
+    private const string apiUrl = "https://5eb1-2806-2f0-5021-e37a-2dad-5ce6-4cd7-c6b0.ngrok-free.app";  
     
 
     private void Start()

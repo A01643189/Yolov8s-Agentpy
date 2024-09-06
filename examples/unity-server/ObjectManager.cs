@@ -19,7 +19,7 @@ public class ObjectManager : MonoBehaviour
     {
         while (true)
         {
-            using (UnityWebRequest www = UnityWebRequest.Get("http://localhost:5500/")) // Replace with your server URL
+            using (UnityWebRequest www = UnityWebRequest.Get("https://5eb1-2806-2f0-5021-e37a-2dad-5ce6-4cd7-c6b0.ngrok-free.app")) // Replace with your server URL
             {
                 yield return www.SendWebRequest();
 
