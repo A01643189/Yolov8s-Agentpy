@@ -9,30 +9,30 @@
 <owl:Ontology rdf:about="file://ontologia.owl"/>
 
 <owl:ObjectProperty rdf:about="#has_suspicious">
-  <rdfs:range rdf:resource="#Suspicious"/>
   <rdfs:domain rdf:resource="#Mobile"/>
+  <rdfs:range rdf:resource="#Suspicious"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#has_obstacle">
-  <rdfs:range rdf:resource="#Suspicious"/>
   <rdfs:domain rdf:resource="#Obstacle"/>
+  <rdfs:range rdf:resource="#Suspicious"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#is_thread">
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
   <rdfs:domain rdf:resource="#Suspicious"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
 </owl:ObjectProperty>
 
 <owl:DatatypeProperty rdf:about="#position_x">
   <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
   <rdfs:domain rdf:resource="#Place"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
 </owl:DatatypeProperty>
 
 <owl:DatatypeProperty rdf:about="#position_y">
   <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
   <rdfs:domain rdf:resource="#Place"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
 </owl:DatatypeProperty>
 
 <owl:Class rdf:about="#Drone">

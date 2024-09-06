@@ -19,7 +19,7 @@ public class ObjectManager : MonoBehaviour
     {
         while (true)
         {
-            using (UnityWebRequest www = UnityWebRequest.Get("http://localhost:5000/")) // Replace with your server URL
+            using (UnityWebRequest www = UnityWebRequest.Get("http://localhost:5500/")) // Replace with your server URL
             {
                 yield return www.SendWebRequest();
 

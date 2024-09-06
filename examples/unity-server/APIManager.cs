@@ -5,7 +5,7 @@ using System.Collections;
 public class APIClient : MonoBehaviour
 {
     private ObjectManager objectManager;
-    private const string apiUrl = "http://localhost:5000";  
+    private const string apiUrl = "http://localhost:5500";  
     
 
     private void Start()
@@ -22,7 +22,7 @@ public class APIClient : MonoBehaviour
     {
         while (true)
         {
-            using (UnityWebRequest www = UnityWebRequest.Get("http://localhost:5000/get_agent_status"))
+            using (UnityWebRequest www = UnityWebRequest.Get("http://localhost:5500"))
             {
                 yield return www.SendWebRequest();
 

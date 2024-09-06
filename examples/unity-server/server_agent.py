@@ -1,75 +1,80 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
-from securityagents import SecurityModel  # Import your script's classes/functions here
+import logging
+from securityagents import SecurityModel  # Assuming the simulation code is named security_simulation.py
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-CORS(app,origins=["*"])
 
-# Initialize your model here
-model = SecurityModel({'steps': 20})
+@app.route('/run_simulation', methods=['POST'])
+def run_simulation():
+    try:
+        # Extract JSON data from the POST request
+        input_data = request.get_json()
 
-#@app.route('/initialize', methods=['POST'])
-# def initialize_simulation():
- #   model.setup()  # Initialize the model with agents and grid
-  #  return jsonify({'status': 'success', 'message': 'Simulation initialized.'})
+        # Extract parameters from the input data
+        steps = input_data['steps']
+        drone_positions = input_data['drone_positions']
+        security_positions = input_data['security_positions']
+        camera_positions = input_data['camera_positions']
+        obstacle_positions = input_data['obstacle_positions']
+        suspicious_positions = input_data['suspicious_positions']
+        drone_station_positions = input_data['drone_station_positions']
 
-
-@app.route('/update_agents', methods=['POST'])
-def update_agents():
-    model.setup()  # Ensure setup is called before accessing attributes
-    model.step()
-    data = request.get_json()
-    if not data:
-        return jsonify({'status': 'error', 'message': 'No data received'}), 400
-
-    for agent_data in data.get('AgentList', []):
-        agent_id = agent_data.get('agentType')
-        new_position = agent_data.get('position', {})
-        x = new_position.get('x')
-        y = new_position.get('y')
-
-        for agent in model.agents:
-            if agent.id == agent_id:
-                agent.position = [x, y]
-                break
-        else:
-            return jsonify({'status': 'error', 'message': f'Agent with id {agent_id} not found'}), 404
-
-    model.step()  # Proceed with simulation step
-
-    return jsonify({'status': 'success', 'message': 'Agents updated successfully.'})
-
-@app.route('/update_position', methods=['PUT'])
-def update_position():
-    data = request.get_json()
-    if not data:
-        return jsonify({'status': 'error', 'message': 'No data received'}), 400
-
-    agent_id = data.get('id')
-    new_position = data.get('position', {})
-    x = new_position.get('x')
-    y = new_position.get('y')
-
-    agent = next((a for a in model.agents if a.id == agent_id), None)
-    if agent:
-        agent.position = [x, y]
-        return jsonify({'status': 'success', 'message': 'Position updated successfully.'})
-    else:
-        return jsonify({'status': 'error', 'message': f'Agent with id {agent_id} not found'}), 404
-
-
-@app.route('/get_agent_status', methods=['GET'])
-def get_agent_status():
-    agent_status = []
-    for agent in model.agents:
-        status = {
-            'id': agent.id,
-            'position': agent.position,
-            # Add additional agent information here if needed
+        # Initialize simulation parameters
+        parameters = {
+            'steps': steps,
+            'drone_positions': drone_positions,
+            'security_positions': security_positions,
+            'camera_positions': camera_positions,
+            'obstacle_positions': obstacle_positions,
+            'suspicious_positions': suspicious_positions,
+            'drone_station_positions': drone_station_positions,
         }
-        agent_status.append(status)
-    
-    return jsonify({'agents': agent_status})
+
+        # Initialize and run the security model
+        model = SecurityModel(parameters)
+        model.run()  # Replace `run_model()` with `run()`
+
+        # Gather results
+        results = {
+            "final_state": model.agent_data,  # Assuming this collects final states or other data
+            "messages": ["Simulation completed successfully"]
+        }
+
+        # Return JSON response
+        return jsonify(results), 200
+
+    except Exception as e:
+        logger.error(f"Error occurred: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/get_agent_data', methods=['GET'])
+def get_agent_data():
+    global model
+    try:
+        if model is None:
+            return jsonify({"error": "Simulation has not been run yet"}), 400
+
+        # Return the agent data from the SecurityModel
+        results = {
+            "agent_data": model.agent_data
+        }
+
+        return jsonify(results), 200
+
+    except Exception as e:
+        logger.error(f"Error occurred: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+# Simple GET request to test the server
+@app.route('/test', methods=['GET'])
+def test_endpoint():
+    return jsonify({"message": "Server is running"}), 200
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=8000)
