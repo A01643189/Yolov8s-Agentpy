@@ -311,17 +311,14 @@ class SecurityModel(ap.Model):
 
         # Add agents to the grid
         for agent, pos in zip(self.agents, positions):
-            self.grid.add_agent(agent, pos)
+            self.grid.add_agents(self.agents)
             agent.position = pos
-
+            
         # Assign specific agents
         self.drone_agent = self.agents[0]  # Assuming the first agent is the DroneAgent
         self.drone_station = self.agents[-1]  # Assuming the last agent is the DroneStationAgent
 
     def step(self):
-        for agent in self.agents:
-            agent.step(self.coordinator)  # Pass the coordinator to each agent’s step function
-            
         for agent in self.agents:
             print(f"Agent ID: {agent.id}, Position: {agent.position}")
             agent.step(self.coordinator)

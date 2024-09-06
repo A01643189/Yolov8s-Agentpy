@@ -3,19 +3,21 @@ from flask_cors import CORS
 from securityagents import SecurityModel  # Import your script's classes/functions here
 
 app = Flask(__name__)
-CORS(app)
+CORS(app,origins=["*"])
 
 # Initialize your model here
 model = SecurityModel({'steps': 20})
 
-@app.route('/initialize', methods=['POST'])
-def initialize_simulation():
-    model.setup()  # Initialize the model with agents and grid
-    return jsonify({'status': 'success', 'message': 'Simulation initialized.'})
+#@app.route('/initialize', methods=['POST'])
+# def initialize_simulation():
+ #   model.setup()  # Initialize the model with agents and grid
+  #  return jsonify({'status': 'success', 'message': 'Simulation initialized.'})
 
 
 @app.route('/update_agents', methods=['POST'])
 def update_agents():
+    model.setup()  # Ensure setup is called before accessing attributes
+    model.step()
     data = request.get_json()
     if not data:
         return jsonify({'status': 'error', 'message': 'No data received'}), 400
