@@ -5,8 +5,6 @@
 
 import agentpy as ap
 from owlready2 import *
-import matplotlib.pyplot as plt
-import IPython
 import heapq
 import random
 
@@ -71,9 +69,8 @@ with onto:
 
 
 
-
-
 onto.save(file="my_ontology.owl")
+
 
 class DroneAgent(ap.Agent):
     def setup(self):
@@ -111,7 +108,7 @@ class DroneAgent(ap.Agent):
 
 
     def step(self, coordinator):
-        if self.position == self.target:
+        if self.position != self.target:
             print(f"Drone {self.id} has reached its target at {self.position}.")
             self.detect_suspicious(coordinator)  # Perform regular checks for suspicious activity
         if self.path_to_target:
@@ -124,14 +121,19 @@ class DroneAgent(ap.Agent):
     def detect_suspicious(self, coordinator):
         neighbors = self.model.grid.neighbors(self, distance=1)
         for agent in neighbors:
-            if isinstance(agent, SuspiciousAgent) and agent.owl_instance.is_threat:
-                print(f"Drone {self.id} detected suspicious activity at {agent.position}.")
-                self.set_target(agent.position)
-                self.alert_coordinator(coordinator, agent)
-            else:
-                self.set_target([0, 2])
-                self.move()
-                print(f"Drone {self.id} did not detect suspicious activity.")
+            if isinstance(agent, SuspiciousAgent):
+                if agent.owl_instance.is_threat:
+                    print(f"Drone {self.id} detected suspicious activity at {agent.position}.")
+                    self.set_target(agent.position)
+                    self.alert_coordinator(coordinator, agent)
+                    self.model.end_simulation()
+                    break
+                else:
+                    agent.is_suspicious_active = False
+                    print(agent.is_suspicious_active)
+                    self.set_target([0, 2])
+                    self.move()
+                    print(f"Drone {self.id} did not detect suspicious activity.")
 
     def alert_coordinator(self, coordinator, suspicious_agent):
         if suspicious_agent.owl_instance.is_threat:
@@ -194,37 +196,20 @@ class SecurityAgent(ap.Agent):
     def setup(self):
         self.agentType = 2
         self.owl_instance = onto.Security(f"Security_{self.id}")
-        self.is_suspicious_active = False
 
     def step(self, coordinator):
-        if self.is_suspicious_active:
-            self.move_drone(self, coordinator)
-            self.evaluate_threats(coordinator)  # Check for threats and command drones
-        else:
-            self.move_drone(self, coordinator)
-        
+        pass
 
-    def move_drone(self, coordinator):
-        if self.is_suspicious_active:
-            print(f"Drone is moving to a suspicious thread")
-        else:
-            print(f"Security Agent {self.id} is moving to a drone station.")
-
-
-    def validate_threat(self, position):
-        # Example validation logic, can be more complex
-        for agent in self.model.agents:
-            if isinstance(agent, SuspiciousAgent) and tuple(agent.position) == tuple(position):
-                return True
-        return False
-
+    def raise_alarm(self):
+        print(f"Security Agent {self.id} is raising an alarm.")
+        model.end_simulation()  # End the simulation
 
 class CameraAgent(ap.Agent):
     def setup(self):
         self.agentType = 3
         self.owl_instance = onto.Camera(f"Camera_{self.id}")
 
-    def see(self, coordinator):  # Now accepts 'coordinator' parameter
+    def see(self, coordinator):
         # Use 'coordinator' here if needed, for now, it will be passed but not used
         perceived_objects = self.model.grid.neighbors(self, distance=2)
         for obj in perceived_objects:
@@ -252,7 +237,6 @@ class CameraAgent(ap.Agent):
     def next(self):
         pass  # Placeholder for future implementation
 
-
 class ObstacleAgent(ap.Agent):
     def setup(self):
         self.agentType = 4
@@ -266,13 +250,14 @@ class ObstacleAgent(ap.Agent):
         # Accepts any number of positional and keyword arguments without using them
         pass
 
+
 class SuspiciousAgent(ap.Agent):
     def setup(self):
         self.agentType = 5
         self.name = f"Suspicious_{self.id}"
         self.owl_instance = onto.Suspicious(self.name)
         # self.owl_instance.is_threat = random.choice([True, False])
-        self.owl_instance.is_threat = False
+        self.owl_instance.is_threat = True
         self.is_suspicious_active = True
 
     def step(self, *args, **kwargs):
@@ -295,12 +280,10 @@ class CentralCoordinator:
 
     def receive_alert(self, agent, position):
         print(f"Alert received from {type(agent).__name__} {agent.id} at position {position}")
-        
+
         self.detected_threats.append({'agent_id': agent.id, 'position': position, 'agent_type': type(agent).__name__})
 
-
 class SecurityModel(ap.Model):
-
     def setup(self):
         self.coordinator = CentralCoordinator()
 
@@ -308,41 +291,48 @@ class SecurityModel(ap.Model):
         self.grid = ap.Grid(self, [10, 10], track_empty=True)
 
         # Create agents
-        self.agents = ap.AgentList(self, 1, DroneAgent)
-        self.agents += ap.AgentList(self, 1, SecurityAgent)
-        self.agents += ap.AgentList(self, 3, CameraAgent)
-        self.agents += ap.AgentList(self, 30, ObstacleAgent)
-        self.agents += ap.AgentList(self, 1, SuspiciousAgent)
-        self.agents += ap.AgentList(self, 1, DroneStationAgent)
+        self.agents = []
+        self.agents += [DroneAgent(self) for _ in range(1)]
+        self.agents += [SecurityAgent(self) for _ in range(1)]
+        self.agents += [CameraAgent(self) for _ in range(3)]
+        self.agents += [ObstacleAgent(self) for _ in range(30)]
+        self.agents += [SuspiciousAgent(self) for _ in range(1)]
+        self.agents += [DroneStationAgent(self) for _ in range(1)]
 
         # Define positions for agents
         drone_positions = [(9, 7)]
         security_positions = [(1, 7)]
         camera_positions = [(4, 7), (6, 2), (5, 1)]
-        obstacle_positions = [(9, 5), (8, 5), (7, 5), (9, 9), (8, 9), (7, 9), (6, 9), (5, 9), (4, 9), (0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (0, 4), (1, 4), (2, 4),
-                              (7, 4), (7, 3), (7, 2), (7, 1), (7, 0), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 4), (6, 0)]
+        obstacle_positions = [(9, 5), (8, 5), (7, 5), (9, 9), (8, 9), (7, 9), (6, 9), (5, 9), (4, 9), (0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (0, 4), (1, 4), (2, 4), (7, 4), (7, 3), (7, 2), (7, 1), (7, 0), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 4), (6, 0)]
         suspicious_positions = [(5, 4)]
         drone_station_positions = [(0, 2)]
 
         positions = drone_positions + security_positions + camera_positions + obstacle_positions + suspicious_positions + drone_station_positions
 
-        self.grid.add_agents(self.agents, positions=positions, random=False)
-
-        # Manually assign positions to agents that require it
+        # Add agents to the grid
         for agent, pos in zip(self.agents, positions):
+            self.grid.add_agent(agent, pos)
             agent.position = pos
 
+        # Assign specific agents
         self.drone_agent = self.agents[0]  # Assuming the first agent is the DroneAgent
         self.drone_station = self.agents[-1]  # Assuming the last agent is the DroneStationAgent
 
     def step(self):
         for agent in self.agents:
             agent.step(self.coordinator)  # Pass the coordinator to each agent’s step function
-
+            
+        for agent in self.agents:
+            print(f"Agent ID: {agent.id}, Position: {agent.position}")
+            agent.step(self.coordinator)
         # Optionally, add checks to determine if the simulation should stop
         if self.all_drones_at_targets():
             print("All drones have reached their targets. Simulation ending.")
             self.stop()
+
+    def end_simulation(self):
+        print("Simulation ended.")
+        self.stop()
 
     def all_drones_at_targets(self):
         return all(drone.position == drone.target for drone in self.agents if isinstance(drone, DroneAgent))
@@ -358,24 +348,10 @@ class SecurityModel(ap.Model):
                     nx, ny = x + dx, y + dy
                     if 0 <= nx < width and 0 <= ny < height:  # Check boundaries
                         # Directly accessing the list of agents in the cell
-                        for neighbor in self.grid[nx, ny]:
-                            neighbors.append(neighbor)
+                        neighbors.extend(self.grid[nx, ny])
         return neighbors
-
-
+    
 parameters = {
-    'steps': 50,
+    'steps': 20,
 
 }
-
-
-def animation_plot(model, ax):
-    agent_type_grid = model.grid.attr_grid('agentType')
-    ap.gridplot(agent_type_grid, cmap='Accent', ax=ax)
-    ax.set_title(f"Security Model\nTime-step: {model.t}")
-
-# Configuración de la visualización
-fig, ax = plt.subplots()
-model = SecurityModel(parameters)
-animation = ap.animate(model, fig, ax, animation_plot)
-IPython.display.HTML(animation.to_jshtml())
