@@ -1,13 +1,13 @@
 # Tec 2024B
 
-Este repositorio contiene la información relacionada a visión computacional
+This repository contains information related to computer vision.
 
-## Necesario para correr los ejemplos
+## Requirements to Run the Examples
 
-- Python 3.11.4 (se recomienda usar pyenv para su instalacion)
+- Python 3.11.4 (it is recommended to use pyenv for installation)
 - [Git LFS](https://git-lfs.com/)
 
-## Demos de los Modelos
+## Model Demos
 
 - [SAM2](https://sam2.metademolab.com/demo)
 - [Florence2 + SAM2](https://huggingface.co/spaces/SkalskiP/florence-sam)
@@ -16,24 +16,22 @@ Este repositorio contiene la información relacionada a visión computacional
 
 ## Hugging Face
 
-En esta [plataforma](https://huggingface.co/) se pueden encontrar modelos pre-entrenados de NLP y CV
+On this [platform](https://huggingface.co/), you can find pre-trained NLP and CV models.
 
-## Recursos para Unity
+## Resources for Unity
 
-- [Cesium](https://cesium.com/learn/unity/): Para generacion de mapas
+- [Cesium](https://cesium.com/learn/unity/): For map generation
 
-## Ejemplos de Codigo
+## Code Examples
 
 - [OpenAI Vision](/examples/openai_vision)
 - [YOLOv8](/examples/yolov8)
 - [SAM2](/examples/sam2)
 
-## Tutoriales
+## Tutorials
 
-Titulo | Visual Studio Code | Google Colab | Descripcion
+Title | Visual Studio Code | Google Colab | Description
 --------|-----------|------------|----------
-Fine Tuning | [Fine Tuning](/examples/fine-tuning/fine-tuning.ipynb) | [Fine Tuning](https://colab.research.google.com/drive/1DCUwO4SC7P_ZmSMbBbtSBdptt8SmI5iF) | Como hacerle fine tuning al modelo de YOLO
+Fine Tuning | [Fine Tuning](/examples/fine-tuning/fine-tuning.ipynb) | [Fine Tuning](https://colab.research.google.com/drive/1DCUwO4SC7P_ZmSMbBbtSBdptt8SmI5iF) | How to fine-tune the YOLO model
 
-### Stream de Unity a python para vision
-
-
+### Streaming from Unity to Python for Vision
